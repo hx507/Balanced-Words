@@ -1,4 +1,4 @@
-#load("slope.txt", "pecan", slope(x))
+#load("slope-k=5.txt", "pecan", slope(x))
 #load("sturmian_word.txt", "pecan", odd_zeros(x))
 #import("ostrowski_defs.pn")
 
@@ -8,11 +8,18 @@ represent(a, n):= slope(a) & ostrowski(a,n)
 $C(a, n) := odd_zeros(n) & represent(a,n)
 
 Display "Example ostrowski-a representation of 20:".
-//Display example ostrowskiFormat { slope(a) &  ostrowski(a,n) & n = 20 }.
 Display example ostrowskiFormat { represent(a, n) & n=20 }.
-Display example stdFormat { represent(a, n) & n=20 }.
 
 Display "Example of C[n]=0 and C[n]=1:".
-//Display example stdFormat { n=20 }.
 Display example ostrowskiFormat { $C(a,n) }.
 Display example ostrowskiFormat { not $C(a,n) }.
+
+
+//#load("test_aut.txt", "pecan", test(x))
+#load("words_for_Pecan/X5_0.txt", "pecan", x_five0(x))
+#load("words_for_Pecan/X5_1.txt", "pecan", x_five1(x))
+#load("words_for_Pecan/X5_2.txt", "pecan", x_five2(x))
+#load("words_for_Pecan/X5_3.txt", "pecan", x_five3(x))
+#load("words_for_Pecan/X5_4.txt", "pecan", x_five4(x))
+
+Display example ostrowskiFormat {x_five2(x)}.

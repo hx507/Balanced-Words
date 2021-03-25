@@ -1,0 +1,11 @@
+// Use for k=5
+// Take in Ost-(sqrt(2)-1) LSD representation N, output C_a[N]
+// 20(201)^omega
+{0,1,2}
+
+s1:0
+2 -> s2
+s2:0
+0 -> s3
+s3:1
+1 -> s1

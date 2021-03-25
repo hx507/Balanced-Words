@@ -1,4 +1,5 @@
 # Convert non-binary automaton accepting alphabet of size n to accept binary inputs separated by 2
+from multiprocessing import Process
 import numpy as np
 import os
 from copy import deepcopy
@@ -83,7 +84,7 @@ def creat_recognizing(n, start_num=0, final_states=None, start_state=0):
             end = (k+1)*n+i
             aut['transitions'][aut['states'][st]][inp].add(aut['states'][end])
             # if k == len(rep)-1:  # last
-                # aut['transitions'][aut['states'][st]][2].add(final_states[i])
+            # aut['transitions'][aut['states'][st]][2].add(final_states[i])
         aut['transitions'][aut['states']
                            [len(rep)*n+i]][0].add(aut['states'][len(rep)*n+i])
         aut['transitions'][aut['states']
@@ -104,6 +105,7 @@ def creat_recognizing(n, start_num=0, final_states=None, start_state=0):
 
 
 def convert(filename, n):
+    # Parse Automaton
     org_aut = parse(filename, n)
     print('Read original automaton:')
     pprint(org_aut)
@@ -127,9 +129,31 @@ def convert(filename, n):
         org_aut['transitions'].update(bridge_aut['transitions'])
         unoccupied_state_number = max(org_aut['states'])+1
         # break
-
     print("Final bridged automaton:")
     pprint(org_aut)
 
+    # Dump everything
+    out_string = ''
+    out_string += ('{0,1,2}\n')
+    for state in org_aut['states']:
+        out_string += (
+            f's{state}: {1 if state in org_aut["accepting_states"] else 0}\n')
+        if state in org_aut['transitions'].keys():
+            for inp in org_aut['transitions'][state].keys():
+                dst = "\n".join(
+                    map(lambda x: f'{inp} -> s'+str(x), org_aut["transitions"][state][inp]))
+                out_string += dst+'\n'
+    print(out_string)
+    with open('./words_for_Pecan/'+filename.split('/')[-1], 'w') as out_file:
+        out_file.write(out_string)
 
-convert('./words/X5_0.txt', 5)
+
+processes = []
+for k in range(3, 11):
+    for i in range(k):
+        p = Process(target=convert, args=(f'./words/X{k}_{i}.txt', k))
+        # convert(f'./words/X{k}_{i}.txt', k)
+        p.start()
+        processes += [p]
+for p in processes:
+    p.join()
