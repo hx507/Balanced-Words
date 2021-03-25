@@ -63,6 +63,7 @@ def creat_recognizing(n, start_num=0, final_states=None, start_state=0):
     aut['alphabet'] = {0, 1, 2}
 
     representations = list(map(lsd_bin, range(n)))
+    print(representations)
 
     transitions = [(start_state, 2, final_states[0])]
     curr_state = start_num
@@ -71,8 +72,9 @@ def creat_recognizing(n, start_num=0, final_states=None, start_state=0):
         for inp in rep[1:]:
             transitions += [(curr_state, inp, curr_state+1)]
             curr_state += 1
-        transitions += [(curr_state, 2, final_states[i])]
+        transitions += [(curr_state, 2, final_states[i+1])]
         curr_state += 1
+        print(transitions)
 
     for t in transitions:
         aut['states'] |= {t[0], t[2]}
@@ -94,7 +96,7 @@ def creat_recognizing(n, start_num=0, final_states=None, start_state=0):
 def convert(filename, n):
     # Parse Automaton
     org_aut = parse(filename, n)
-    print('Read original automaton:')
+    print(f'Read original automaton with alphabet of size {n}:')
     pprint(org_aut)
 
     unoccupied_state_number = max(org_aut['states'])+1
@@ -147,12 +149,15 @@ def convert(filename, n):
             out_file.write(out_string)
 
 
-convert(f'./words/X3_0.txt', 3)
+representation_alphabet_sizes = {
+    3: 3, 4: 3, 5: 3, 6: 3, 7: 4, 8: 4, 9: 4, 10: 5}
+convert(f'./words/X5_0.txt', representation_alphabet_sizes[5])
 if True:
     processes = []
     for k in range(3, 11):
         for i in range(k):
-            p = Process(target=convert, args=(f'./words/X{k}_{i}.txt', k))
+            p = Process(target=convert, args=(
+                f'./words/X{k}_{i}.txt', representation_alphabet_sizes[k]))
             p.start()
             processes += [p]
     for p in processes:
