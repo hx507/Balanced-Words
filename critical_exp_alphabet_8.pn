@@ -22,4 +22,4 @@ Display example ostrowskiFormat { not $C(a,n) }.
 #load("words_for_Pecan/X5_3.txt", "pecan", x_five3(x))
 #load("words_for_Pecan/X5_4.txt", "pecan", x_five4(x))
 
-Display example ostrowskiFormat {x_five2(x)}.
+Display example ostrowskiFormat {x_five0(x)}.

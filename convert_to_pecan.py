@@ -34,7 +34,7 @@ def parse(filename, n):
             if '->' not in l:
                 state, acc = list(map(lambda x: int(x), l.split(' ')))
                 if curr_state is None:
-                    aut_to_read['initial_state'] = curr_state
+                    aut_to_read['initial_state'] = state
                 if acc:
                     aut_to_read['accepting_states'].add(state)
                 aut_to_read['states'].add(state)
@@ -63,44 +63,31 @@ def creat_recognizing(n, start_num=0, final_states=None, start_state=0):
     aut['alphabet'] = {0, 1, 2}
 
     representations = list(map(lsd_bin, range(n)))
-    nlongest = max(map(len, representations))
 
-    aut['states'] = np.arange(n*(nlongest+2)+1)+start_num
+    transitions = [(start_state, 2, final_states[0])]
+    curr_state = start_num
+    for i, rep in enumerate(representations[1:]):
+        transitions += [(start_state, rep[0], curr_state)]
+        for inp in rep[1:]:
+            transitions += [(curr_state, inp, curr_state+1)]
+            curr_state += 1
+        transitions += [(curr_state, 2, final_states[i])]
+        curr_state += 1
 
-    aut['states'][-(n+1)] = start_state
-    if final_states is not None:
-        final_states[final_states == -
-                     1] = aut['states'][-n:][final_states == -1]
-        aut['states'][-n:] = final_states
-
-    for s in aut['states'][:-n]:
-        aut['transitions'][s] = {0: set(), 1: set(), 2: set()}
-    # i in 0..n
-    for i in range(n):
-        rep = representations[i]
-        for k in range(len(rep)):
-            st = k*n+i
-            inp = rep[k]
-            end = (k+1)*n+i
-            aut['transitions'][aut['states'][st]][inp].add(aut['states'][end])
-            # if k == len(rep)-1:  # last
-            # aut['transitions'][aut['states'][st]][2].add(final_states[i])
-        aut['transitions'][aut['states']
-                           [len(rep)*n+i]][0].add(aut['states'][len(rep)*n+i])
-        aut['transitions'][aut['states']
-                           [len(rep)*n+i]][2].add(final_states[i])
-
-    aut['transitions'][start_state][0] = set.union(*[dst[0] for src,
-                                                     dst in aut['transitions'].items() if src in aut['states'][:n]])
-    aut['transitions'][start_state][1] = set.union(*[dst[1] for src,
-                                                     dst in aut['transitions'].items() if src in aut['states'][:n]])
-    aut['transitions'][start_state][2] = set.union(*[dst[2] for src,
-                                                     dst in aut['transitions'].items() if src in aut['states'][:n]])
+    for t in transitions:
+        aut['states'] |= {t[0], t[2]}
+    for s in aut['states']:
+        aut['transitions'][s] = {0: set(map(lambda x: x[2], filter(lambda x: x[0] == s and x[1] == 0, transitions))),
+                                 1: set(map(lambda x: x[2], filter(lambda x: x[0] == s and x[1] == 1, transitions))),
+                                 2: set(map(lambda x: x[2], filter(lambda x: x[0] == s and x[1] == 2, transitions))), }
     # remove empty sets
-    # aut['states'] = list(filter(lambda x: x in aut['transitions'] and len(
-    # aut['transitions'][x].items()), aut['states']))
     aut['transitions'] = {
         src: {inp: v for inp, v in dst.items() if len(v)} for src, dst in aut['transitions'].items()}
+    aut['transitions'] = {
+        src: dst for src, dst in aut['transitions'].items() if len(dst)}
+
+    print(f'Bridge from {start_state} -> {final_states}')
+    pprint(aut)
     return aut
 
 
@@ -113,47 +100,60 @@ def convert(filename, n):
     unoccupied_state_number = max(org_aut['states'])+1
 
     # reg1234 = creat_recognizing(
-    # n, start_num=10000, start_state=-1, final_states=np.arange(n)+10)
+    # n, start_num=10, start_state=-1, final_states=np.arange(n)+100)
     # print('Create automaton recognizing bin(1234)[2]:')
     # pprint(reg1234)
 
-    org_keys = list(org_aut['transitions'].keys())
-    for src_state in org_keys:
-        final_states = np.array([list(org_aut['transitions'][src_state][i])[
-            0] if i in org_aut['transitions'][src_state] else -1 for i in range(n)])
-        bridge_aut = creat_recognizing(
-            n, start_num=unoccupied_state_number, final_states=final_states, start_state=src_state)
-        pprint(bridge_aut)
+    if True:
+        org_keys = list(org_aut['transitions'].keys())
+        for src_state in org_keys:
+            final_states = np.array([list(org_aut['transitions'][src_state][i])[
+                0] if i in org_aut['transitions'][src_state] else -1 for i in range(n)])
+            bridge_aut = creat_recognizing(
+                n, start_num=unoccupied_state_number, final_states=final_states, start_state=src_state)
+            # pprint(bridge_aut)
 
-        org_aut['states'] |= set(bridge_aut['states'])
-        org_aut['transitions'].update(bridge_aut['transitions'])
-        unoccupied_state_number = max(org_aut['states'])+1
-        # break
-    print("Final bridged automaton:")
-    pprint(org_aut)
+            org_aut['states'] |= set(bridge_aut['states'])
+            org_aut['transitions'].update(bridge_aut['transitions'])
+            unoccupied_state_number = max(org_aut['states'])+1
+            # break
+
+         # must start with 2
+        new_start = max(org_aut['states'])+1
+        org_aut['states'] |= {new_start, -1}
+        org_aut['transitions'][new_start] = {2: {org_aut['initial_state']}}
+        org_aut['initial_state'] = new_start
+        print("Final bridged automaton:")
+        pprint(org_aut)
 
     # Dump everything
-    out_string = ''
-    out_string += ('{0,1,2}\n')
-    for state in org_aut['states']:
-        out_string += (
-            f's{state}: {1 if state in org_aut["accepting_states"] else 0}\n')
-        if state in org_aut['transitions'].keys():
-            for inp in org_aut['transitions'][state].keys():
-                dst = "\n".join(
-                    map(lambda x: f'{inp} -> s'+str(x), org_aut["transitions"][state][inp]))
-                out_string += dst+'\n'
-    print(out_string)
-    with open('./words_for_Pecan/'+filename.split('/')[-1], 'w') as out_file:
-        out_file.write(out_string)
+    if True:
+        out_string = ''
+        out_string += ('{0,1,2}\n')
+        all_states = sorted(list(org_aut['states']))
+        all_states.remove(org_aut['initial_state'])
+        all_states = [org_aut['initial_state']]+all_states
+        print(all_states)
+        for state in all_states:
+            out_string += (
+                f's{state}: {1 if state in org_aut["accepting_states"] else 0}\n')
+            if state in org_aut['transitions'].keys():
+                for inp in org_aut['transitions'][state].keys():
+                    dst = "\n".join(
+                        map(lambda x: f'{inp} -> s'+str(x), org_aut["transitions"][state][inp]))
+                    out_string += dst+'\n'
+        print(out_string)
+        with open('./words_for_Pecan/'+filename.split('/')[-1], 'w') as out_file:
+            out_file.write(out_string)
 
 
-processes = []
-for k in range(3, 11):
-    for i in range(k):
-        p = Process(target=convert, args=(f'./words/X{k}_{i}.txt', k))
-        # convert(f'./words/X{k}_{i}.txt', k)
-        p.start()
-        processes += [p]
-for p in processes:
-    p.join()
+convert(f'./words/X3_0.txt', 3)
+if True:
+    processes = []
+    for k in range(3, 11):
+        for i in range(k):
+            p = Process(target=convert, args=(f'./words/X{k}_{i}.txt', k))
+            p.start()
+            processes += [p]
+    for p in processes:
+        p.join()
