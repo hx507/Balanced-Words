@@ -1,6 +1,5 @@
 #load("slope-k=5.txt", "pecan", slope(x))
 #load("sturmian_word.txt", "pecan", sturmian_word(x))
-#load("finite.txt", "pecan", finite(x))
 #import("ostrowski_defs.pn")
 
 Restrict a is bco_standard.
@@ -28,9 +27,9 @@ Display example ostrowskiFormat {test(x)}.
 #load("words_for_Pecan/X5_3.txt", "pecan", x_five3(x))
 #load("words_for_Pecan/X5_4.txt", "pecan", x_five4(x))
 
-Display example ostrowskiFormat {x_five0(n)}.
-Display example ostrowskiFormat {x_five1(n) }.
-Display example ostrowskiFormat {x_five2(n) }.
-Display example ostrowskiFormat {x_five3(n) }.
-Display example ostrowskiFormat {x_five4(n) }.
-Display example ostrowskiFormat {x_five0(n) & slope(a) & ostrowski(a,n) }.
+Display "Took a peek of X_5:".
+Display example ostrowskiFormat {x_five0(n) & slope(a) & ostrowski(a,n) & n=8}.
+//Display example ostrowskiFormat {x_five1(n) & slope(a) & ostrowski(a,n) }.
+//Display example ostrowskiFormat {x_five2(n) & slope(a) & ostrowski(a,n) }.
+Display example ostrowskiFormat {x_five3(n) & slope(a) & ostrowski(a,n) & n=2}.
+//Display example ostrowskiFormat {x_five4(n) & slope(a) & ostrowski(a,n) }.

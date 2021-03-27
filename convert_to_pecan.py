@@ -63,16 +63,19 @@ def creat_recognizing(n, start_num=0, final_states=None, start_state=0):
     aut['alphabet'] = {0, 1, 2}
 
     representations = list(map(lsd_bin, range(n)))
+    maxlen = max(map(len, representations))
+    representations = list(
+        map(lambda x: x+[0]*(maxlen-len(x)), representations))
     print(representations)
 
-    transitions = [(start_state, 2, final_states[0])]
+    transitions = []
     curr_state = start_num
-    for i, rep in enumerate(representations[1:]):
+    for i, rep in enumerate(representations):
         transitions += [(start_state, rep[0], curr_state)]
         for inp in rep[1:]:
             transitions += [(curr_state, inp, curr_state+1)]
             curr_state += 1
-        transitions += [(curr_state, 2, final_states[i+1])]
+        transitions += [(curr_state, 2, final_states[i])]
         curr_state += 1
         print(transitions)
 
@@ -102,7 +105,7 @@ def convert(filename, n):
     unoccupied_state_number = max(org_aut['states'])+1
 
     # reg1234 = creat_recognizing(
-    # n, start_num=10, start_state=-1, final_states=np.arange(n)+100)
+        # n, start_num=10, start_state=-1, final_states=np.arange(n)+100)
     # print('Create automaton recognizing bin(1234)[2]:')
     # pprint(reg1234)
 
