@@ -5,6 +5,8 @@
 Restrict a is bco_standard.
 Restrict n is ostrowski(a).
 represent(a, n):= slope(a) & ostrowski(a,n)
+Restrict p,q,r is ostrowski(a).
+represent3(a, p, q, r):= slope(a) & represent(a,p) & represent(a,q) & represent(a,r)
 $C(a, n) := sturmian_word(n) & represent(a,n)
 
 Display "Example ostrowski-a representation of 1:".
@@ -13,23 +15,59 @@ Display "Example ostrowski-a representation of 7:".
 Display example ostrowskiFormat { represent(a, n) & n=7 }.
 
 Display "Example of C[n]=0 and C[n]=1:".
-Display example ostrowskiFormat { $C(a,n) }.
 Display example ostrowskiFormat { not $C(a,n) }.
+Display example ostrowskiFormat { $C(a,n) }.
 
 
 #load("test_aut.txt", "pecan", test(x))
 Display "This is a test:".
 Display example ostrowskiFormat {test(x)}.
 
-#load("words_for_Pecan/X5_0.txt", "pecan", x_five0(x))
-#load("words_for_Pecan/X5_1.txt", "pecan", x_five1(x))
-#load("words_for_Pecan/X5_2.txt", "pecan", x_five2(x))
-#load("words_for_Pecan/X5_3.txt", "pecan", x_five3(x))
-#load("words_for_Pecan/X5_4.txt", "pecan", x_five4(x))
+#load("words_for_Pecan/X5_0.txt", "pecan", x5_0(x))
+#load("words_for_Pecan/X5_1.txt", "pecan", x5_1(x))
+#load("words_for_Pecan/X5_2.txt", "pecan", x5_2(x))
+#load("words_for_Pecan/X5_3.txt", "pecan", x5_3(x))
+#load("words_for_Pecan/X5_4.txt", "pecan", x5_4(x))
+
+
+// This will OOM my 32 gig memory
+//Display "Check X0..X5 are mutually exclusive:".
+//Theorem ("X0..X5 are mutually exclusive", {
+//    exists a. forall n. represent(a,n) &
+//    (if x5_0(n) then not (x5_1(n)|x5_2(n)|x5_3(n)|x5_4(n))) &
+//    (if x5_1(n) then not (x5_0(n)|x5_2(n)|x5_3(n)|x5_4(n))) &
+//    (if x5_2(n) then not (x5_1(n)|x5_0(n)|x5_3(n)|x5_4(n))) &
+//    (if x5_3(n) then not (x5_1(n)|x5_2(n)|x5_0(n)|x5_4(n))) &
+//    (if x5_4(n) then not (x5_1(n)|x5_2(n)|x5_3(n)|x5_0(n))) 
+//}).
+
+Display "Check X0..X5 are mutually exclusive:".
+Theorem ("X5_0 is different from the rest", { exists a. forall n. (n=0)| represent(a,n) & (if x5_0(n) then not (x5_1(n)|x5_2(n)|x5_3(n)|x5_4(n))) }).
+Theorem ("X5_1 is different from the rest", { exists a. forall n. (n=0)| represent(a,n) & (if x5_1(n) then not (x5_0(n)|x5_2(n)|x5_3(n)|x5_4(n))) }).
+Theorem ("X5_2 is different from the rest", { exists a. forall n. (n=0)| represent(a,n) & (if x5_2(n) then not (x5_1(n)|x5_0(n)|x5_3(n)|x5_4(n))) }).
+Theorem ("X5_3 is different from the rest", { exists a. forall n. (n=0)| represent(a,n) & (if x5_3(n) then not (x5_1(n)|x5_2(n)|x5_0(n)|x5_4(n))) }).
+Theorem ("X5_4 is different from the rest", { exists a. forall n. (n=0)| represent(a,n) & (if x5_4(n) then not (x5_1(n)|x5_2(n)|x5_3(n)|x5_0(n))) }).
+
 
 Display "Took a peek of X_5:".
-Display example ostrowskiFormat {x_five0(n) & slope(a) & ostrowski(a,n) & n=8}.
-//Display example ostrowskiFormat {x_five1(n) & slope(a) & ostrowski(a,n) }.
-//Display example ostrowskiFormat {x_five2(n) & slope(a) & ostrowski(a,n) }.
-Display example ostrowskiFormat {x_five3(n) & slope(a) & ostrowski(a,n) & n=2}.
-//Display example ostrowskiFormat {x_five4(n) & slope(a) & ostrowski(a,n) }.
+Theorem ("X5 starts with 031402..", { exists a. exists n. represent(a,n) & (
+    (n=1 & x5_0(n))|
+    (n=2 & x5_3(n))|
+    (n=3 & x5_1(n))|
+    (n=4 & x5_4(n))|
+    (n=5 & x5_0(n))|
+    (n=6 & x5_2(n))
+)}).
+
+Display "Verify all consecutive 0 are replaced correctly:".
+no_ones_between(a,p,q,r) := forall n. (p<q&q<r) & if (p<n&n<q)|(q<n&n<r) then !$C(a,n+1)
+no_zeros_between(a,p,q,r) := forall n. (p<q&q<r) & if (p<n&n<q)|(q<n&n<r) then $C(a,n+1)
+Theorem ("All consecutive 0 are one of 010, 102, 020, or 201", { exists a. forall p,q,r. represent3(a,p,q,r) & 
+   if (!$C(a,p) & !$C(a,q) & !$C(a,r) & no_zeros_between(a,p,q,r)) then 
+       (
+        (x5_0(p)&x5_1(q)&x5_0(r))|
+        (x5_1(p)&x5_0(q)&x5_2(r))|
+        (x5_0(p)&x5_2(q)&x5_0(r))|
+        (x5_2(p)&x5_0(q)&x5_1(r))
+       )
+}).
