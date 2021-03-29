@@ -59,28 +59,23 @@ $C(a, n) := @postprocess[sturmian_word(n) & represent(a,n)]
 //This runs forever
 Display "Verify all consecutive 0 are replaced correctly:".
 //no_ones_between(a,p,q,r) := @postprocess[forall n. (p<q&q<r) & if (p<n&n<r)&(n!=q) then !sturmian_word(n+1)]
-no_ones_between(a,p,q,r) := @postprocess[forall n. (p<q&q<r) & if (p<n&n<q)|(q<n&n<r) then !sturmian_word(n+1)]
+no_ones_between(p,q,r) := forall n. if (p<n&n<q)|(q<n&n<r) then !sturmian_word(n+1)
 //no_zeros_between(a,p,q,r) := @postprocess[forall n. (p<q&q<r) & if (p<n&n<r)&(n!=q) then sturmian_word(n+1)]
-no_zeros_between(a,p,q,r) := @postprocess[forall n. if (p<n&n<q)|(q<n&n<r) then sturmian_word(n+1)]
-Theorem ("All consecutive 0 are one of 010, 102, 020, or 201", { @postprocess[exists a. forall p,q,r. represent3(a,p,q,r) & 
-   if (!$C(a,p) & !$C(a,q) & !$C(a,r) & no_zeros_between(a,p,q,r)) then 
-       (
-       @postprocess[
-        (x5_0(p)&x5_1(q)&x5_0(r))|
-        (x5_1(p)&x5_0(q)&x5_2(r))|
-        (x5_0(p)&x5_2(q)&x5_0(r))|
-        (x5_2(p)&x5_0(q)&x5_1(r))
-        ]
-       )]
-}).
+no_zeros_between(p,q,r) := forall n. if (p<n&n<q)|(q<n&n<r) then sturmian_word(n+1)
+//Theorem ("All consecutive 0 are one of 010, 102, 020, or 201", { exists a. forall p,q,r. represent3(a,p,q,r) & 
+   //if (!$C(a,p) & !$C(a,q) & !$C(a,r) & no_zeros_between(p,q,r)) then 
+       //(
+        //(x5_0(p)&x5_1(q)&x5_0(r))|
+        //(x5_1(p)&x5_0(q)&x5_2(r))|
+        //(x5_0(p)&x5_2(q)&x5_0(r))|
+        //(x5_2(p)&x5_0(q)&x5_1(r))
+       //)
+//}).
 //Display "Verify all consecutive 1 are replaced correctly:".
 
-//Display "Verify critical exponent of X5 is indeed 3/2".
-//Theorem ("All factors have period at most 3/2", { exists a. exists n. represent(a,n) & (
-    //(if n=1 then x5_0(n))&
-    //(if n=2 then x5_3(n))&
-    //(if n=3 then x5_1(n))&
-    //(if n=4 then x5_4(n))&
-    //(if n=5 then x5_0(n))&
-    //(if n=6 then x5_2(n))
-//)}).
+Display "Verify critical exponent of X5 is indeed 3/2".
+same_symbol_at(p,q):= @postprocess[(x5_0(p)&x5_0(q))|(x5_1(p)&x5_1(q))|(x5_2(p)&x5_2(q))|(x5_3(p)&x5_3(q))|(x5_4(p)&x5_4(q))]
+Theorem ("All factors have period at most 3/2", { exists a. exists p,n,r. represent3(a,p,n,r) & (
+    (2*n<=3*p) 
+    & (forall q. if (represent(a,q) & q+p<n) then same_symbol_at(r+q,p+r+q))
+)}).

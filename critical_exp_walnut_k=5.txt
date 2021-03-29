@@ -1,0 +1,21 @@
+eval first_0_to_0 "?msd_pell C_alpha[1] = @0 & X5[0] = @0";
+
+eval possible_triplets_for_0s "?msd_pell Ap,q,r
+    ((p < q) & (q < r) &
+    (C_alpha[p + 1] = @0) &
+    (C_alpha[q + 1] = @0) &
+    (C_alpha[r + 1] = @0) &
+    (Ai ((i > p) & (i < r) & (i != q)) =>
+    (C_alpha[i + 1] = @1))) =>
+    (((X5[p] = @0) & (X5[q] = @1) & (X5[r] = @0)) |
+    ((X5[p] = @1) & (X5[q] = @0) & (X5[r] = @2)) |
+    ((X5[p] = @0) & (X5[q] = @2) & (X5[r] = @0)) |
+    ((X5[p] = @2) & (X5[q] = @0) & (X5[r] = @1)))";
+
+eval fac_low_exponent "?msd_pell Ei,p,n
+    (p >= 1) & (2*n <= 3*p) & (Aj (j + p < n) =>
+        X5[i + j] = X5[i + j + p])";
+
+eval fac_ex_exponent "?msd_pell Ei,p,n
+    (p >= 1) & (2*n = 3*p) & (Aj (j + p < n) =>
+        X5[i + j] = X5[i + j + p])";
