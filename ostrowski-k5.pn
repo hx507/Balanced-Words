@@ -1,0 +1,78 @@
+#load("slope-k=5.txt", "pecan", slope(x))
+#load("sturmian_word.txt", "pecan", $C(x))
+#import("ostrowski_defs.pn")
+
+
+Restrict a is bco_standard.
+Restrict n is ostrowski(a).
+Restrict x,y,z is ostrowski(a).
+bco_adder_k5(x,y,z):= @postprocess[exists a. slope(a) & bco_adder(a,x,y,z)]
+//#save_aut("automata/bco_adder_k5.aut", bco_adder_k5)
+ostrowski_zero_k5(z):= @postprocess[exists a. slope(a) & ostrowski_zero(a,z)]
+ostrowski_even_k5(z):= @postprocess[exists a. slope(a) & ostrowski_even(a,z)]
+ostrowski_odd_k5(z):= @postprocess[exists a. slope(a) & ostrowski_odd(a,z)]
+x is ostrowski_k5 := @postprocess[exists a. slope(a) & bco_valid(a,x)]
+
+Structure ostrowski_k5 defining {
+    "adder": bco_adder_k5(any, any, any),
+    "less": bco_lt(any, any),
+    "equal": bco_eq(any, any),
+    "zero": ostrowski_zero_k5(any),
+    "even": ostrowski_even_k5(any),
+    "odd": ostrowski_odd_k5(any)
+}
+#forget(n)
+
+Restrict n is ostrowski_k5.
+Restrict p,q,r are ostrowski_k5.
+
+Display example ostrowskiFormat { n=1 }.
+
+#load("words_for_Pecan/X5_0.txt", "pecan", x5_0(x))
+#load("words_for_Pecan/X5_1.txt", "pecan", x5_1(x))
+#load("words_for_Pecan/X5_2.txt", "pecan", x5_2(x))
+#load("words_for_Pecan/X5_3.txt", "pecan", x5_3(x))
+#load("words_for_Pecan/X5_4.txt", "pecan", x5_4(x))
+
+
+Display "Check X0..X5 are mutually exclusive:".
+Theorem ("X5_0 is different from the rest", { forall n. (n=0)| (if x5_0(n) then not (x5_1(n)|x5_2(n)|x5_3(n)|x5_4(n))) }).
+Theorem ("X5_1 is different from the rest", { forall n. (n=0)| (if x5_1(n) then not (x5_0(n)|x5_2(n)|x5_3(n)|x5_4(n))) }).
+Theorem ("X5_2 is different from the rest", { forall n. (n=0)| (if x5_2(n) then not (x5_1(n)|x5_0(n)|x5_3(n)|x5_4(n))) }).
+Theorem ("X5_3 is different from the rest", { forall n. (n=0)| (if x5_3(n) then not (x5_1(n)|x5_2(n)|x5_0(n)|x5_4(n))) }).
+Theorem ("X5_4 is different from the rest", { forall n. (n=0)| (if x5_4(n) then not (x5_1(n)|x5_2(n)|x5_3(n)|x5_0(n))) }).
+
+Display "Took a peek of X_5:".
+Theorem ("X5 starts with 031402..", { exists n.  (
+    (if n=1 then x5_0(n))&
+    (if n=2 then x5_3(n))&
+    (if n=3 then x5_1(n))&
+    (if n=4 then x5_4(n))&
+    (if n=5 then x5_0(n))&
+    (if n=6 then x5_2(n))
+)}).
+
+//This runs forever
+Display "Verify all consecutive 0 are replaced correctly:".
+no_ones_between(p,q,r) := @postprocess[forall n. (p<q&q<r) & if (p<n&n<r)&(n!=q) then !$C(n+1)]
+//no_ones_between(p,q,r) := forall n. if (p<n&n<q)|(q<n&n<r) then !$C(n+1)
+no_zeros_between(p,q,r) := @postprocess[forall n. (p<q&q<r) & if (p<n&n<r)&(n!=q) then $C(n+1)]
+//no_zeros_between(p,q,r) := forall n. if (p<n&n<q)|(q<n&n<r) then $C(n+1)
+Theorem ("All consecutive 0 are one of 010, 102, 020, or 201", { forall p,q,r. 
+   if (!$C(p) & !$C(q) & !$C(r) & no_zeros_between(p,q,r)) then
+       (
+        (x5_0(p)&x5_1(q)&x5_0(r))|
+        (x5_1(p)&x5_0(q)&x5_2(r))|
+        (x5_0(p)&x5_2(q)&x5_0(r))|
+        (x5_2(p)&x5_0(q)&x5_1(r))
+       )
+}).
+//Display "Verify all consecutive 1 are replaced correctly:".
+
+Display "Verify critical exponent of X5 is indeed 3/2".
+same_symbol_at(p,q):= @postprocess[(x5_0(p)&x5_0(q))|(x5_1(p)&x5_1(q))|(x5_2(p)&x5_2(q))|(x5_3(p)&x5_3(q))|(x5_4(p)&x5_4(q))]
+Theorem ("All factors have period at most 3/2", { exists p,n,r. (
+    (2*n<=3*p)
+    & (forall q. if ( q+p<n) then same_symbol_at(r+q,p+r+q))
+)}).
+
