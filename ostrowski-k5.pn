@@ -28,11 +28,16 @@ Restrict p,q,r are ostrowski_k5.
 
 Display example ostrowskiFormat { n=1 }.
 
-#load("words_for_Pecan/X5_0.txt", "pecan", x5_0(x))
-#load("words_for_Pecan/X5_1.txt", "pecan", x5_1(x))
-#load("words_for_Pecan/X5_2.txt", "pecan", x5_2(x))
-#load("words_for_Pecan/X5_3.txt", "pecan", x5_3(x))
-#load("words_for_Pecan/X5_4.txt", "pecan", x5_4(x))
+#load("words_for_Pecan/X5_0.txt", "pecan", x5_0b(x))
+#load("words_for_Pecan/X5_1.txt", "pecan", x5_1b(x))
+#load("words_for_Pecan/X5_2.txt", "pecan", x5_2b(x))
+#load("words_for_Pecan/X5_3.txt", "pecan", x5_3b(x))
+#load("words_for_Pecan/X5_4.txt", "pecan", x5_4b(x))
+x5_0(n):=@postprocess[x5_0b(n)]
+x5_1(n):=@postprocess[x5_1b(n)]
+x5_2(n):=@postprocess[x5_2b(n)]
+x5_3(n):=@postprocess[x5_3b(n)]
+x5_4(n):=@postprocess[x5_4b(n)]
 
 
 Display "Check X0..X5 are mutually exclusive:".
@@ -58,15 +63,15 @@ no_ones_between(p,q,r) := @postprocess[forall n. (p<q&q<r) & if (p<n&n<r)&(n!=q)
 //no_ones_between(p,q,r) := forall n. if (p<n&n<q)|(q<n&n<r) then !$C(n+1)
 no_zeros_between(p,q,r) := @postprocess[forall n. (p<q&q<r) & if (p<n&n<r)&(n!=q) then $C(n+1)]
 //no_zeros_between(p,q,r) := forall n. if (p<n&n<q)|(q<n&n<r) then $C(n+1)
-Theorem ("All consecutive 0 are one of 010, 102, 020, or 201", { forall p,q,r. 
-   if (!$C(p) & !$C(q) & !$C(r) & no_zeros_between(p,q,r)) then
-       (
-        (x5_0(p)&x5_1(q)&x5_0(r))|
-        (x5_1(p)&x5_0(q)&x5_2(r))|
-        (x5_0(p)&x5_2(q)&x5_0(r))|
-        (x5_2(p)&x5_0(q)&x5_1(r))
-       )
-}).
+//Theorem ("All consecutive 0 are one of 010, 102, 020, or 201", { forall p,q,r. 
+   //if (!$C(p) & !$C(q) & !$C(r) & no_zeros_between(p,q,r)) then
+       //(
+        //(x5_0(p)&x5_1(q)&x5_0(r))|
+        //(x5_1(p)&x5_0(q)&x5_2(r))|
+        //(x5_0(p)&x5_2(q)&x5_0(r))|
+        //(x5_2(p)&x5_0(q)&x5_1(r))
+       //)
+//}).
 //Display "Verify all consecutive 1 are replaced correctly:".
 
 Display "Verify critical exponent of X5 is indeed 3/2".
